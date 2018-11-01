@@ -1,0 +1,31 @@
+apiVersion: skaffold/v1alpha2
+kind: Config
+build:
+  tagPolicy:
+    envTemplate:
+      template: "{{.DOCKER_REGISTRY}}/daniel-izquierdo-lopez1-ibm-com/java-helloworld-master:{{.VERSION}}"
+  artifacts:
+  - imageName: changeme
+    workspace: .
+    docker: {}
+  local: {}
+deploy:
+  kubectl:
+    manifests:
+profiles:
+- name: dev
+  build:
+    tagPolicy:
+      envTemplate:
+        template: "{{.DOCKER_REGISTRY}}/daniel-izquierdo-lopez1-ibm-com/java-helloworld-master:{{.DIGEST_HEX}}"
+    artifacts:
+    - docker: {}
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: java-helloworld-master
+        chartPath: charts/java-helloworld-master
+        setValueTemplates:
+          image.repository: "{{.DOCKER_REGISTRY}}/daniel-izquierdo-lopez1-ibm-com/java-helloworld-master"
+          image.tag: "{{.DIGEST_HEX}}"
